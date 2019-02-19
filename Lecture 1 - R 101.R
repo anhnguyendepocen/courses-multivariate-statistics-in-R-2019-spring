@@ -12,7 +12,7 @@
 
 # You can try more compex operations too:
 
-(11*2.3)^2 + 3*(log(15)) * pi + sin(1/5)
+(11*2.3)^2 + 3*(log(15)) * pi + sin(1/5) 
 # [1] 665.8114
 
 # ^: means exponential
