@@ -34,9 +34,9 @@ number1 + number2
 number1 +      Number2
 # [1] 121
 
-# There are also functions in are, that are basically commands.
-# Functions usually have parameters, that define what data to use, and how the command should be executed
-# You always have to use a parentheses after the names of the functions, even if it does not have any parameters.
+# There are also functions in R that are basically commands.
+# Functions usually have parameters that define what data to use, and how the command should be executed
+# You always have to use parentheses after the names of the functions, even if it does not have any parameters.
 # For example, let's see how to use commands to make plots
 
 # Graphics
@@ -78,7 +78,7 @@ fruits[-c(1:3, 7)]
 # Data frames
 # There are built in dataframes in R, just to try things
 
-data("USArrests") # Load a built in data frame. This one is a about US arrests
+data("USArrests") # Load a built in data frame. This one is about US arrests
 USArrests  # Check the data.frame
 
 str(USArrests) # Check the structure of the data frame, types of variables, etc.
@@ -130,4 +130,6 @@ library(swirl) # Load the package to the R session
 # Follow the instructions of swirl and do the first lesson. As a homework, you can do lesson 2-7. 
 # To stat swirl, just type: 
 swirl()
+
+
 
