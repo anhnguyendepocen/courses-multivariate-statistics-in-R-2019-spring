@@ -63,8 +63,14 @@ ggplot(data = movies) +
 # Option 1 Solution
 ggplot(data = movies) +
     aes(y = genre, x = thtr_rel_month) +
-    geom_point(size = 3) #+
-    #scale_x_continuous(breaks = 1:12, minor_breaks = 0) # The x axis is ugly, we will learn how to fix it later
+    geom_point(size = 3) +
+    scale_x_continuous(breaks = 1:12, minor_breaks = 0) # The x axis is ugly, we will learn how to fix it later
+
+ggplot(data = movies) +
+  aes(y = genre, x = (thtr_rel_month)) +
+  geom_point(size = 3) +
+  scale_x_discrete()
+  scale_x_continuous(breaks = scales::pretty_breaks())
     
 # Option 2 Solution
 ggplot(data = movies) +
