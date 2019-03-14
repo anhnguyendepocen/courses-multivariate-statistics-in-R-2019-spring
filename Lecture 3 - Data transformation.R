@@ -25,6 +25,7 @@ x %>%
 
 # [1] 46.02999
 # Let's load the dplyr package, which is for data transformation in data frames
+# Btw, it also contains the %>% operator, so you don't need to load magrittr
 library(dplyr) 
 
 # Let's use the ToothGrowth data once again, and practice with the pipe opeartor
@@ -57,7 +58,8 @@ tooth_results <-
     summarise(mean_len_cm = mean(len_cm),
               cases = n())
 
-# You ca also use the grouping with mutate. Then it adds the group means and number of cases to the original data
+tooth_results
+# You can also use the grouping with mutate. Then it adds the group means and number of cases to the original data
 # This way, the result will also contain the original data AND the summary statistics with redundancy
 ToothGrowth %>%
     mutate(len_cm = len / 10) %>%
@@ -124,6 +126,7 @@ library(tidyr)
 # We will use the who data from the tidyr package
 # Check the codebook
 data(who)
+who
 ?who
 # gather arranges data to long format
 # you have to give a name that will store
@@ -167,7 +170,7 @@ who_tidy
 
 # Now we can verify what age groups we have
 who_tidy %>% 
-    distinct(age)
+    distinct(age_group)
 
 # We can also transform the data to wide format, for e.g. the age groups. 
 # Let's say we only want to make the age groups in wide format, but keep the gender,  test results, year, etc. in long format
@@ -181,5 +184,5 @@ who_tidy %>%
 
 # Note that wide format is not the optimal format for data analysis or plotting if you 
 # have repeated measurements
-    
-    
+
+
