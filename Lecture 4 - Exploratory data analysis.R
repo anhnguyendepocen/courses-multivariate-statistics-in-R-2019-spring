@@ -225,3 +225,6 @@ titanic_df <-
     group_by(Pclass) %>% 
     mutate(med_price = median(Fare)) %>% 
     ungroup()
+
+
+
