@@ -184,5 +184,4 @@ who_tidy %>%
 
 # Note that wide format is not the optimal format for data analysis or plotting if you 
 # have repeated measurements
-
-
+  
