@@ -151,3 +151,48 @@ stargazer(family_fit_pois,
           apply.coef = exp,
           apply.se   = exp,
           type = "text")
+
+#Cumulative Link Model
+
+library(dplyr)
+install.packages("ordinal")
+library(ordinal)
+install.packages("janitor")
+library(janitor)
+
+# We will use a dataset about the ratings of NYC restaurants from A to C
+restaurants <- read_csv("https://data.cityofnewyork.us/api/views/43nn-pn8j/rows.csv")
+
+# we drop some irrelevant variables, filter a few values, tidy variable names
+rest_clean <- restaurants %>% 
+  select(BORO, `CUISINE DESCRIPTION`, `CRITICAL FLAG`, SCORE, GRADE) %>%
+  clean_names() %>% 
+  drop_na() %>% 
+  filter(grade %in% c("A", "B", "C")) %>% 
+  filter(cuisine_description %in% c("African", "American", "Asian", "Latin", "Middle Eastern")) %>% 
+  filter(boro %in% c ("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND"))
+
+view(rest_clean)
+
+# dependent variable needs to be a factor
+rest_clean$grade <- factor(rest_clean$grade)
+
+#building the cumulative link model
+clm1 <- clm(grade ~ cuisine_description + boro, data=rest_clean)
+summary(clm1)
+
+#running post-hoc tests
+emmeans::emmeans(clm1, "cuisine_description", "boro")
+
+
+# testing the model assumption, the proportional odd's ratio 
+#with either the nominal_test or scale_test function
+nominal_test(clm1)
+scale_test(clm1)
+
+#let's plot our data
+ggplot(rest_clean, aes(x = cuisine_description, y = grade)) +
+  geom_boxplot(size = .75) +
+  geom_jitter(alpha = .5) +
+  facet_wrap("boro") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
