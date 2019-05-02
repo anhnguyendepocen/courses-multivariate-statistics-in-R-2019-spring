@@ -117,18 +117,18 @@ cocktails %>%
 
 cor.test(cocktails$abv, cocktails$sugar, method = "kendall")
 
-# There are further options in the psych package
-library(psych)
-
 cocktails %>% 
     select(abv:sugar) %>% 
-    cor.ci(method = "spearman", n.iter = 1000) # Specify number of iterations
+    psych::cor.ci(method = "spearman", n.iter = 1000) # Specify number of iterations
 
 # Compare correlations using psych::paired.r()
-paired.r(-.47, -.67, n = 55)
+library(psych)
+
+psych::paired.r(-.47, -.67, n = 55)
 
 # If you provide n2, you can specify the sample size for the variables independently
-paired.r(-.47, -.67, n = 55, n2 = 550)
+psych::paired.r(-.47, -.67, n = 55, n2 = 550)
+
 
 ### LISTS
 a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))

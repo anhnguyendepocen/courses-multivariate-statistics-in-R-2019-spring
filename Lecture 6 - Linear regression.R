@@ -60,8 +60,6 @@ predict(acid_lm, newdata)
 # modelr::add_predictions() returns a data frame. This one is the preferable.
 modelr::add_predictions(newdata, acid_lm)
 
-
-
 ## Checking the assumptions for linear regression
 # Measure multicollinearity using the variance inflaction factor (VIF)
 # Values for any varible should not be larger than 10
@@ -75,6 +73,7 @@ mean(car::vif(acid_lm))
 
 # Measuring the independence of residuals
 car::dwt(acid_lm)
+
 # It seems like model has some significant autocorrelation, so the residuals are not independent
 
 # To check heteroscetasticity inspect the residual diagnostic plots
@@ -182,32 +181,20 @@ library(stargazer)
 library(sjPlot)
 
 # To get the table in the console, use the type = "text" argument.
-stargazer(lm1, lm2, title = "Results", align = TRUE, type = "text")
 tab_model(lm1, lm2, title = "Results")
 
 
 # You can also have the table in different formats, e.g. html. If you do this, you can save the object and view the results using your web browser. We will later learn a way to include those tables to your manuscripts.
 
 # Let's also add standardized coefficients
-# We need to transform the non-standardized values using the lm.beta package
-install.packages("lm.beta")
-library(lm.beta)
-# Create standardized versions from all objects
-lm1_std <- lm.beta(lm1)
-lm2_std <- lm.beta(lm2)
-lm3_std <- lm.beta(lm3)
-lm4_std <- lm.beta(lm4)
 
 # We have to explicitly tell stargazer which coefficients we want to see
 results_table_html <-
-    stargazer(lm1_std,
-              lm2_std,
-              lm3_std,
-              lm4_std,
-              coef = list(lm1_std$standardized.coefficients,
-                          lm2_std$standardized.coefficients,
-                          lm3_std$standardized.coefficients,
-                          lm4_std$standardized.coefficients),
+    stargazer(lm1,
+              lm2,
+              lm3,
+              lm4,
+
               title = "Model comparison",
               dep.var.labels = "Alcohol content",
               align = TRUE,
@@ -263,6 +250,5 @@ cocktails %>%
   geom_smooth(method = "lm", se = FALSE, size = 1.5, color = "black") +
   geom_segment(aes(xend = acid, yend = mean_abv, y = .fitted), linetype = "dashed", color = "purple", size = 1.2) +
   geom_point(size = 2)
-
 
 
