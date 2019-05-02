@@ -115,6 +115,7 @@ acid_lm_clean <-
 summary(acid_lm_clean)
 # We can check the diagnostics without the influential cases.
 # Remember, that you can only remove cases from the dataset, when you are perfectly sure that the data was not recorded correctly. You cannot simlply remove outliers becauses they don't fit your model.
+library(ggfortify)
 autoplot(acid_lm_clean, which = 1:6)
 # We can see that the residuals are still not perfect, which makes the reliability of the model shaky
 # Dealing with diagnostics is often an iterative process, where problematic values are investigated recursively
@@ -151,7 +152,11 @@ tidy(lm1, conf.int = TRUE, conf.level = .95)
 lm_cat <- lm(abv ~ acid : sugar + type, data = cocktails)
 # To change the baseline, convert it to random, and use the levels to set the baseline to carbonated
 # Use the forcats::fct_relevel() function
-lm4 <- lm(abv ~ acid : sugar + fct_relevel(type, "carbonated"), data = cocktails)
+lm4 <- 
+  cocktails %>% 
+  mutate(type = fct_relevel(type, "carbonated")) %>% 
+  lm(abv ~ acid : sugar + type, data = .)
+
 tidy(lm4)
 
 ## Model selection
@@ -174,10 +179,8 @@ anova(lm1, lm2, lm3)
 
 # Based on the comparisons, there is no significant diffference. So we should choose the simplest model, that has the smallest df! It is model number 3!
 
-# To report the results of regression, you have to use a table, according to APA6. To create such a table, the easiest is to use the stargazer package, that collects all information from the models, and creates a nice table.
-install.packages("stargazer")
+# To report the results of regression, you have to use a table, according to APA6. To create such a table, the easiest is to use the sjPlot package, that collects all information from the models, and creates a nice table.
 install.packages("sjPlot")
-library(stargazer)
 library(sjPlot)
 
 # To get the table in the console, use the type = "text" argument.
@@ -188,31 +191,14 @@ tab_model(lm1, lm2, title = "Results")
 
 # Let's also add standardized coefficients
 
-# We have to explicitly tell stargazer which coefficients we want to see
 results_table_html <-
-    stargazer(lm1,
-              lm2,
-              lm3,
-              lm4,
-
-              title = "Model comparison",
-              dep.var.labels = "Alcohol content",
-              align = TRUE,
-              ci = TRUE,
-              df = TRUE,
-              digits = 2,
-              type = "html")
+    tab_model(lm1,lm2,lm3,lm4, 
+              show.std = TRUE, 
+              show.est = FALSE
+)
 
 # You can save the results using the write_lines() function, and open the html in the browser
 write_lines(results_table_html, "results_table.html")
-
-# Or you can just use the sjPlot::tab_model() to do the standardization for you
-tab_model(lm1, lm2, lm3, lm4, show.std = TRUE, show.est = FALSE)
-
-
-
-
-
 
 # Plots for the slides --------------------------------------------------------------
 ## Model fit measures
