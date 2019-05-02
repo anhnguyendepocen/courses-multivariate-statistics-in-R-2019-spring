@@ -10,6 +10,7 @@ cocktails <- read_tsv("http://bit.ly/2zbj7kA") # Same stuff, but shortened url
 # To be able to use catagorical variables in statistical models, we may need to convert the categories to dummy variables. This means that the variable name will be the category name, and if this category is true for the observation, the value of the variable will be 1, or otherwise 0.
 # Task: create dummy coded variables in the cocktail dataset  from the type variable
 cocktails %>% distinct(type)
+
 dummy_cocktails <-
     cocktails %>% 
     mutate(value = 1) %>% # This defines what will be the spread across variables
@@ -59,57 +60,20 @@ predict(acid_lm, newdata)
 # modelr::add_predictions() returns a data frame. This one is the preferable.
 modelr::add_predictions(newdata, acid_lm)
 
-## Model fit measures
-# See model fitting "game" at http://www.dangoldstein.com/regression.html
-
-# Plot the residuals (error term from the model prediction)
-# Ignore the warnings, thet are known developer bugs
-# This plot shows the unexplained variance of the model (summary of the red lines)
-cocktails %>% 
-    augment(lm(abv ~ acid, data = .), .) %>% 
-    ggplot() +
-    aes(y = abv, x = acid) +
-    geom_smooth(method = "lm", se = FALSE, size = 1.5, color = "black") +
-    geom_segment(aes(xend = acid, yend = .fitted), linetype = "dashed", color = "red", size = 1.2) +
-    geom_point(size = 3)
-
-# All variability in the outcome variable (variance)
-# This plots shows the total variance of the outcome variable (summary of the blue lines)
-cocktails %>% 
-    mutate(mean_abv = mean(abv)) %>% 
-    ggplot() +
-    aes(y = abv, x = acid) +
-    geom_hline(aes(yintercept = mean_abv), size = 1.5) +
-    geom_segment(aes(xend = acid, yend = mean_abv), linetype = "dashed", color = "blue", size = 1.2) +
-    geom_point(size = 3)
-
-# Improvement of the fit by using the model, compared to only using the mean
-# This plots shows the total variance of the outcome variable (summary of the blue lines)
-cocktails %>% 
-    augment(lm(abv ~ acid, data = .), .) %>% 
-    mutate(mean_abv = mean(abv)) %>% 
-    ggplot() +
-    aes(y = abv, x = acid) +
-    geom_hline(aes(yintercept = mean_abv), size = 1.5) +
-    geom_smooth(method = "lm", se = FALSE, size = 1.5, color = "black") +
-    geom_segment(aes(xend = acid, yend = mean_abv, y = .fitted), linetype = "dashed", color = "purple", size = 1.2) +
-    geom_point(size = 2)
-
-
-
 ## Checking the assumptions for linear regression
 # Measure multicollinearity using the variance inflaction factor (VIF)
 # Values for any varible should not be larger than 10
-car::vif(lm2)
+car::vif(acid_lm)
 
 # If the average VIF is larger than 1, it means that multicollineratity is biasing our model
-mean(car::vif(lm2))
+mean(car::vif(acid_lm))
 
 # We can also look at the tolerance, that is the reciprocal of VIF, where we are looking for values closer to one (tolerance has the adventage of being between 0 and 1). Values below .1 indicate serious problems, while values below .2 are somewhat troublesome
-1/car::vif(lm2)
+1/car::vif(acid_lm)
 
 # Measuring the independence of residuals
-car::dwt(lm2)
+car::dwt(acid_lm)
+
 # It seems like model has some significant autocorrelation, so the residuals are not independent
 
 # To check heteroscetasticity inspect the residual diagnostic plots
@@ -178,6 +142,10 @@ tidy(lm3)
 
 # Get the confidence intervals for parameters
 confint(lm1, level = 0.95)
+
+# Preferably, you can also get the confint using broom::tidy
+tidy(lm1, conf.int = TRUE, conf.level = .95)
+
 # You can combine these
 # R can also deal with categorical variables, as they are automatically dummied, and the first level is taken as baseline
 lm_cat <- lm(abv ~ acid : sugar + type, data = cocktails)
@@ -208,33 +176,25 @@ anova(lm1, lm2, lm3)
 
 # To report the results of regression, you have to use a table, according to APA6. To create such a table, the easiest is to use the stargazer package, that collects all information from the models, and creates a nice table.
 install.packages("stargazer")
+install.packages("sjPlot")
 library(stargazer)
+library(sjPlot)
 
 # To get the table in the console, use the type = "text" argument.
-stargazer(lm1, lm2, title = "Results", align = TRUE, type = "text")
+tab_model(lm1, lm2, title = "Results")
+
 
 # You can also have the table in different formats, e.g. html. If you do this, you can save the object and view the results using your web browser. We will later learn a way to include those tables to your manuscripts.
 
 # Let's also add standardized coefficients
-# We need to transform the non-standardized values using the lm.beta package
-install.packages("lm.beta")
-library(lm.beta)
-# Create standardized versions from all objects
-lm1_std <- lm.beta(lm1)
-lm2_std <- lm.beta(lm2)
-lm3_std <- lm.beta(lm3)
-lm4_std <- lm.beta(lm4)
 
 # We have to explicitly tell stargazer which coefficients we want to see
 results_table_html <-
-    stargazer(lm1_std,
-              lm2_std,
-              lm3_std,
-              lm4_std,
-              coef = list(lm1_std$standardized.coefficients,
-                          lm2_std$standardized.coefficients,
-                          lm3_std$standardized.coefficients,
-                          lm4_std$standardized.coefficients),
+    stargazer(lm1,
+              lm2,
+              lm3,
+              lm4,
+
               title = "Model comparison",
               dep.var.labels = "Alcohol content",
               align = TRUE,
@@ -245,3 +205,50 @@ results_table_html <-
 
 # You can save the results using the write_lines() function, and open the html in the browser
 write_lines(results_table_html, "results_table.html")
+
+# Or you can just use the sjPlot::tab_model() to do the standardization for you
+tab_model(lm1, lm2, lm3, lm4, show.std = TRUE, show.est = FALSE)
+
+
+
+
+
+
+# Plots for the slides --------------------------------------------------------------
+## Model fit measures
+# See model fitting "game" at http://www.dangoldstein.com/regression.html
+
+# Plot the residuals (error term from the model prediction)
+# Ignore the warnings, thet are known developer bugs
+# This plot shows the unexplained variance of the model (summary of the red lines)
+cocktails %>% 
+  augment(lm(abv ~ acid, data = .), .) %>% 
+  ggplot() +
+  aes(y = abv, x = acid) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.5, color = "black") +
+  geom_segment(aes(xend = acid, yend = .fitted), linetype = "dashed", color = "red", size = 1.2) +
+  geom_point(size = 3)
+
+# All variability in the outcome variable (variance)
+# This plots shows the total variance of the outcome variable (summary of the blue lines)
+cocktails %>% 
+  mutate(mean_abv = mean(abv)) %>% 
+  ggplot() +
+  aes(y = abv, x = acid) +
+  geom_hline(aes(yintercept = mean_abv), size = 1.5) +
+  geom_segment(aes(xend = acid, yend = mean_abv), linetype = "dashed", color = "blue", size = 1.2) +
+  geom_point(size = 3)
+
+# Improvement of the fit by using the model, compared to only using the mean
+# This plots shows the total variance of the outcome variable (summary of the blue lines)
+cocktails %>% 
+  augment(lm(abv ~ acid, data = .), .) %>% 
+  mutate(mean_abv = mean(abv)) %>% 
+  ggplot() +
+  aes(y = abv, x = acid) +
+  geom_hline(aes(yintercept = mean_abv), size = 1.5) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.5, color = "black") +
+  geom_segment(aes(xend = acid, yend = mean_abv, y = .fitted), linetype = "dashed", color = "purple", size = 1.2) +
+  geom_point(size = 2)
+
+
