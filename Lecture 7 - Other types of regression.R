@@ -2,11 +2,12 @@
 install.packages("tidyverse")
 install.packages("titanic")
 install.packages("AER")
-# install.packages("mlogit")
 
 library(tidyverse)
 library(broom)
 library(titanic)
+
+theme_set(theme_light())
 
 # Create plot to show why linear regression is not good for binomial data
 df_logit <- 
@@ -59,39 +60,17 @@ ggplot(titanic) +
     coord_cartesian(ylim = c(0, 1))
 
 # Reporting logistic regression
-library(stargazer)
-stargazer(surv_fit, type = "text")
+library(sjPlot)
+
+tab_model(surv_fit, show.aic = TRUE, show.loglik = TRUE, collapse.se = TRUE)
 
 # To save it to html, do:
-# To convert the coefficients and confidence intervals to OR, do this:
+# Coefficients are automatically transformed to Odds Ratios
 surv_fit_table_html <-
-    stargazer(surv_fit,
-              align = TRUE,
-              ci = TRUE,
-              df = TRUE,
-              apply.coef = exp,
-              apply.se   = exp,
-              type = "text")
+  tab_model(surv_fit, show.aic = TRUE, show.loglik = TRUE, collapse.se = TRUE)
 
 # You can save the results using the write_lines() function
 write_lines(surv_fit_table_html, "surv_fit_table.html")
-
-# TODO: INSTEAD OF MULTINOMIAL REGRESSION, ADD COX REGRESSION FOR ORDINAL OUTPUTS
-
-
-### Multinomial logistic regression
-# Predict the class of the passanger, given the age
-# library(mlogit)
-# 
-# titanic <- 
-#     mutate(titanic, pclass = pclass %>% as.factor())
-# 
-# titanic_mlogit <- mlogit.data(titanic, choice = "pclass", shape = "wide")
-# pclass_fit <- mlogit(pclass ~ 1 | age, data = titanic_mlogit, reflevel = 2)
-# 
-# summary(pclass_fit)
-# # We cannot use the broom package for the multinomial regression output, so if we want to get the odds ratios, we need to get the exponential of the coefficients
-# exp(pclass_fit$coefficients)
 
 ## Poisson regression
 # Use poisson regression to predict a count-type variable (integer values, and totally left-skewed)
@@ -138,26 +117,16 @@ titanic %>%
     geom_point() +
     geom_smooth(method = "glm", method.args = list(family = "poisson"))
 
-# We can check the residual plots
-autoplot(family_fit_nb, 1:6)
-
 # When reporting poisson/negative binomial regression, you have to report the same things as in logistic regression
-# Stargazer does not know the negative binomial regression :(, so it can only create table for the poisson
-stargazer(family_fit_pois, type = "text")
-stargazer(family_fit_pois,
-          align = TRUE,
-          ci = TRUE,
-          df = TRUE,
-          apply.coef = exp,
-          apply.se   = exp,
-          type = "text")
 
-#Cumulative Link Model
+tab_model(family_fit_nb)
 
-library(dplyr)
+#Cumulative Link Model for Ordinal data
+
 install.packages("ordinal")
-library(ordinal)
 install.packages("janitor")
+
+library(ordinal)
 library(janitor)
 
 # We will use a dataset about the ratings of NYC restaurants from A to C
@@ -175,10 +144,14 @@ rest_clean <- restaurants %>%
 view(rest_clean)
 
 # dependent variable needs to be a factor
-rest_clean$grade <- factor(rest_clean$grade)
+rest_clean <- 
+  rest_clean %>% 
+  mutate(grade = as.factor(grade),
+         cuisine_description = fct_relevel(cuisine_description, "American"))
 
 #building the cumulative link model
-clm1 <- clm(grade ~ cuisine_description + boro, data=rest_clean)
+# Comparing to American cousine, and the BRONX
+clm1 <- clm(grade ~ cuisine_description + boro, data = rest_clean)
 summary(clm1)
 
 #running post-hoc tests
