@@ -43,7 +43,7 @@ if (!require(psych)) install.packages("psych")
 library(psych)
 cocktails %>% 
     select(abv:sugar) %>% 
-  psych::corr.test()
+    psych::corr.test()
 
 ## Normality assumption
 # Transform the data
@@ -61,7 +61,7 @@ cocktails %>%
 
 # Do it on the tidyverse way!
 # The corrr package
-if (require(corrr)) install.packages("corr")
+if (require(corrr)) install.packages("corrr")
 library(corrr)
 
 attitude <- as_tibble(datasets::attitude)
@@ -70,12 +70,9 @@ attitude <- as_tibble(datasets::attitude)
 correlate(attitude)
 
 # Use focus to remove a variable from both rows and columns
-# Similar to 
+# Similar to using select AND filter at the same time
 correlate(attitude) %>% 
   focus(-advance, mirror = TRUE)
-
-correlate(attitude) %>% 
-  focus_if(mirror = TRUE)
 
 # This arranges both colums and rows
 correlate(attitude) %>% 
@@ -132,6 +129,7 @@ psych::paired.r(-.47, -.67, n = 55)
 # If you provide n2, you can specify the sample size for the variables independently
 psych::paired.r(-.47, -.67, n = 55, n2 = 550)
 
+
 ### LISTS
 a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
 
@@ -156,7 +154,7 @@ cocktails %>%
     shapiro.test() %>%
     str()
 
-# Chi squared test
+# CHI-SQUARE TEST
 # Use the survey from the MASS package
 ?MASS::survey
 survey <- as_tibble(MASS::survey)
