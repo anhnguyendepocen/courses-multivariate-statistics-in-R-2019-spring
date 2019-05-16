@@ -1,20 +1,3 @@
-# X-mas cuteness
-library(ggplot2)
-
-dataset <- c(9,8,7,6,5,4,4.5,4,3,2,1,0.8,0.2)
-
-df <- data.frame(group = rep(c("l","d"), 
-                             each = length(dataset)),
-                 x = 1:length(dataset),
-                 y = c(dataset, dataset * -1))
-
-ggplot(df) +
-  aes(x = x, y = y) +
-  geom_col(fill = '#00A650', width = .8) +
-  coord_flip() + 
-  ggtitle("Happy X-mas 2018") + 
-  theme_void()
-
 # PCA, Factor analysis, CFA
 library(tidyverse)
 library(GGally)
@@ -69,7 +52,8 @@ eb_loadings %>%
         coord_flip() +
         geom_text() +
         facet_wrap(~component) +
-        labs(y = "Loading strength", x = "Variable")
+        labs(y = "Loading strength", x = "Variable") +
+        theme_minimal()
 
 # Ok, so how are we using this information?
 # Extract component scores into a tibble
